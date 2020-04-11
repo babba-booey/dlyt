@@ -33,6 +33,12 @@ setup_env(){
     pip install youtube-dl
 }
 
+actual_filename(){
+    name="$1"
+    name="${name%.*}"
+    echo "$(find ./ -type f -name "$name.*")"
+}
+
 download_video(){
     dl_link="$1"
     dl_dir="$2"
@@ -49,9 +55,10 @@ download_video(){
             "$yt_dl" "$dl_link" --restrict-filenames
             ffmpeg_path="$(command -v ffmpeg)"
             mp3_filename="${dl_filename%.*}.mp3"
-            "$ffmpeg_path"  -i "$dl_filename" "$mp3_filename"
-            rm -v "$dl_filename"
-            rm -rfv "$VIRTUAL_ENV_PATH"
+            actual_downloaded_file="$(actual_filename "$dl_filename")"
+            "$ffmpeg_path" -loglevel panic -i "$actual_downloaded_file" "$mp3_filename"
+            rm -v "$actual_downloaded_file"
+            rm -rf "$VIRTUAL_ENV_PATH"
         )
     fi
 }
